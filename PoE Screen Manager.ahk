@@ -40,6 +40,7 @@ Hotkey, IfWinActive
 Menu, Tray, Icon, Display.dll, 1
 Menu, Tray, Add, Start PoE, RunPoE
 Menu, Tray, Add, Save Current Values, SaveCurrentValues
+Menu, Tray, Default, Start PoE
 
 if Format("{1:Ts}",StoreValuesOnExit) = "True"
     OnExit("ExitFunc")
