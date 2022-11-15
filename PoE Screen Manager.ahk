@@ -39,6 +39,7 @@ Hotkey, IfWinActive
 
 Menu, Tray, Icon, Display.dll, 1
 Menu, Tray, Add, Start PoE, RunPoE
+Menu, Tray, Add, Open Config, OpenConfig
 Menu, Tray, Add, Save Current Values, SaveCurrentValues
 Menu, Tray, Default, Start PoE
 
@@ -67,6 +68,10 @@ if Format("{1:Ts}",StartPoE) = "True"
 {
     RunPoE()
 }
+Return
+
+OpenConfig:
+Run %A_ScriptDir%\config.ini
 Return
 
 DecreasePoEHeight:
