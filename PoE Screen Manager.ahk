@@ -40,6 +40,7 @@ Hotkey, IfWinActive
 Menu, Tray, Icon, Display.dll, 1
 Menu, Tray, Add, Start PoE, RunPoE
 Menu, Tray, Add, Open Config, OpenConfig
+Menu, Tray, Add, Reload, Reload
 Menu, Tray, Add, Save Current Values, SaveCurrentValues
 Menu, Tray, Default, Start PoE
 
@@ -73,6 +74,9 @@ Return
 OpenConfig:
 Run %A_ScriptDir%\config.ini
 Return
+
+Reload:
+Reload
 
 DecreasePoEHeight:
 WinGetPos, WinPosXTemp, WinPosYTemp, WinPosWTemp, WinPosHTemp, ahk_class POEWindowClass
