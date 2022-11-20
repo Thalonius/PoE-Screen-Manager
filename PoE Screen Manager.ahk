@@ -3,12 +3,14 @@
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
+Menu, Tray, NoStandard
 Menu, Tray, Icon, Display.dll, 1
 Menu, Tray, Add, Start PoE, RunPoE
 Menu, Tray, Add, Select Profile, ShowSelectionWindow
 Menu, Tray, Add, Open Config, OpenConfig
 Menu, Tray, Add, Reload, Reload
 Menu, Tray, Add, Save Current Values, SaveCurrentValues
+Menu, Tray, Add, Exit, Exit
 Menu, Tray, Default, Start PoE
 
 GoSub, InitSettings
@@ -330,6 +332,9 @@ SaveValues(FirstTime)
         IniWrite, %StoreValuesOnExit%, config.ini, General, StoreValuesOnExit
     }
 }
+
+Exit:
+ExitApp
 
 ExitFunc(ExitReason, ExitCode)
 {
