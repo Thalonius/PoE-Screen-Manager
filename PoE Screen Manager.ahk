@@ -274,13 +274,19 @@ MovePoEWindow:
 Return
 
 MoveWindowToLeft:
-    WinGet, active_id, ID, A
-    WinMove, ahk_id %active_id%, , 0, 0, %WinPosX%, %A_ScreenHeight%
+    if (A_ScreenWidth - WinPosW > 50)
+    {
+        WinGet, active_id, ID, A
+        WinMove, ahk_id %active_id%, , 0, %WinPosY%, %WinPosX%, %WinPosH%
+    }
 Return
 
 MoveWindowToRight:
-    WinGet, active_id, ID, A
-    WinMove, ahk_id %active_id%, , % WinPosX+WinPosW, 0, % A_ScreenWidth - WinPosX - WinPosW, %A_ScreenHeight%
+    if (A_ScreenWidth - WinPosW > 50)
+    {
+        WinGet, active_id, ID, A
+        WinMove, ahk_id %active_id%, , % WinPosX+WinPosW, %WinPosY%, % A_ScreenWidth - WinPosX - WinPosW, %WinPosH%
+    }
 Return
 
 RunPoE:
