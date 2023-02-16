@@ -3,6 +3,8 @@
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
+NonBreakSpace := Chr(160)
+
 Menu, Tray, NoStandard
 Menu, Tray, Icon, Display.dll, 1
 Menu, Tray, Add, Start PoE, RunPoE
@@ -22,16 +24,16 @@ Gui, Add, Edit, x+5 ys-3 w150 ReadOnly vActiveProfileTxt, %ActiveProfile%
 Gui, Add, ListView, section xs+0 y+5 w305 -LV0x10 Sort -ReadOnly -Multi AltSubmit vProfileLV gProfileLV, Profile
 Gui, Add, Text, xs+0 y+8 section, X
 Gui, Add, Edit, x+3 ys-3 w60 Limit5 vPosXEdit gPosXEdit, 
-Gui, Add, UpDown, vPosXUpDown Range-9999-9999
+Gui, Add, UpDown, vPosXUpDown gPosXUpDown Range-9999-9999
 Gui, Add, Text, x+5 ys+0, Y
 Gui, Add, Edit, x+3 ys-3 w60 Limit4 vPosYEdit gPosYEdit, 
 Gui, Add, UpDown, vPosYUpDown Range-9999-9999
 Gui, Add, Text, x+5 ys+0, W
 Gui, Add, Edit, x+3 ys-3 w60 Limit4 vPosWEdit, 
-Gui, Add, UpDown, vPosWUpDown
+Gui, Add, UpDown, vPosWUpDown gPosWUpDown Range0-9999
 Gui, Add, Text, x+5 ys+0, H
 Gui, Add, Edit, x+3 ys-3 w60 Limit4 vPosHEdit, 
-Gui, Add, UpDown, vPosHUpDown
+Gui, Add, UpDown, vPosHUpDown gPosHUpDown Range0-9999
 Gui, Add, Button, xs+0 y+10 gAddProfile, Add Profile
 Gui, Add, Button, x+5 yp+0 gDeleteProfile, Delete Profile
 Gui, Add, Button, x+0 yp+0 w1 Hidden Default gLV_OK, OK
@@ -64,6 +66,41 @@ Return
 PosYEdit:
 GuiControlGet, PosYUPDown, , PosYEdit, 
 Return
+
+PosXUpDown:
+Gosub, PosXEdit
+CleanNumber(PosXUPDown)
+GuiControl, , PosXEdit, %PosXUPDown%
+Return
+
+PosYUpDown:
+Gosub, PosYEdit
+CleanNumber(PosYUPDown)
+GuiControl, , PosYEdit, %PosYUPDown%
+Return
+
+PosWUpDown:
+GuiControlGet, PosWUPDown, , PosWEdit, 
+CleanNumber(PosWUPDown)
+GuiControl, , PosWEdit, %PosWUPDown%
+Return
+
+PosHUpDown:
+GuiControlGet, PosHUPDown, , PosHEdit, 
+CleanNumber(PosHUPDown)
+GuiControl, , PosHEdit, %PosHUPDown%
+Return
+
+CleanNumber(ByRef NumberToClean)
+{
+    global NonBreakSpace
+
+    If InStr(NumberToClean, NonBreakSpace,,2)
+        StringReplace, NumberToClean, NumberToClean, %NonBreakSpace%, , All
+    If InStr(NumberToClean, ".",,2)
+        StringReplace, NumberToClean, NumberToClean, ., , All
+    
+}
 
 InitSettings:
     DefaultProfileName := "New Profile "
