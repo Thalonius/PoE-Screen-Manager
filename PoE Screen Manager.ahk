@@ -18,16 +18,20 @@ GoSub, InitSettings
 Gui, Font, Bold
 Gui, +AlwaysonTop +LastFound -MinimizeBox -MaximizeBox
 Gui, Add, Text, section x10 y10, Active Profile:
-Gui, Add, Edit, x+5 ys-3 w100 ReadOnly vActiveProfileTxt, %ActiveProfile%
-Gui, Add, ListView, section xs+0 y+5 w225 -LV0x10 Sort -ReadOnly -Multi AltSubmit vProfileLV gProfileLV, Profile
+Gui, Add, Edit, x+5 ys-3 w150 ReadOnly vActiveProfileTxt, %ActiveProfile%
+Gui, Add, ListView, section xs+0 y+5 w305 -LV0x10 Sort -ReadOnly -Multi AltSubmit vProfileLV gProfileLV, Profile
 Gui, Add, Text, xs+0 y+8 section, X
-Gui, Add, Edit, x+3 ys-3 w40 Limit4 Number vPosXEdit, 
+Gui, Add, Edit, x+3 ys-3 w60 Limit5 vPosXEdit gPosXEdit, 
+Gui, Add, UpDown, vPosXUpDown Range-9999-9999
 Gui, Add, Text, x+5 ys+0, Y
-Gui, Add, Edit, x+3 ys-3 w40 Limit4 Number vPosYEdit, 
+Gui, Add, Edit, x+3 ys-3 w60 Limit4 vPosYEdit gPosYEdit, 
+Gui, Add, UpDown, vPosYUpDown Range-9999-9999
 Gui, Add, Text, x+5 ys+0, W
-Gui, Add, Edit, x+3 ys-3 w40 Limit4 Number vPosWEdit, 
+Gui, Add, Edit, x+3 ys-3 w60 Limit4 vPosWEdit, 
+Gui, Add, UpDown, vPosWUpDown
 Gui, Add, Text, x+5 ys+0, H
-Gui, Add, Edit, x+3 ys-3 w40 Limit4 Number vPosHEdit, 
+Gui, Add, Edit, x+3 ys-3 w60 Limit4 vPosHEdit, 
+Gui, Add, UpDown, vPosHUpDown
 Gui, Add, Button, xs+0 y+10 gAddProfile, Add Profile
 Gui, Add, Button, x+5 yp+0 gDeleteProfile, Delete Profile
 Gui, Add, Button, x+0 yp+0 w1 Hidden Default gLV_OK, OK
@@ -51,6 +55,14 @@ Loop, Parse, ConfigFile, `r, `n
 }
 GoSub, InitSelectionWindow
 ;GoSub, ShowSelectionWindow
+Return
+
+PosXEdit:
+GuiControlGet, PosXUPDown, , PosXEdit, 
+Return
+
+PosYEdit:
+GuiControlGet, PosYUPDown, , PosYEdit, 
 Return
 
 InitSettings:
