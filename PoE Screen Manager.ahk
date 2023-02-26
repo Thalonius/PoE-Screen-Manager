@@ -5,22 +5,16 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 NonBreakSpace := Chr(160)
 
-Menu, Tray, NoStandard
-Menu, Tray, Icon, Display.dll, 1
-Menu, Tray, Add, Start PoE, RunPoE
-Menu, Tray, Add, Select Profile, ShowSelectionWindow
-Menu, Tray, Add, Open Config, OpenConfig
-Menu, Tray, Add, Reload, Reload
-Menu, Tray, Add, Save Current Values, SaveCurrentValues
-Menu, Tray, Add, Exit, Exit
-Menu, Tray, Default, Start PoE
-
 GoSub, InitSettings
+
+GoSub, BuildMenu
+GoSub, BuildTrayMenu
 
 Gui, Font, Bold
 Gui, +AlwaysonTop +LastFound -MinimizeBox -MaximizeBox
 Gui, Add, Text, section x10 y10, Active Profile:
 Gui, Add, Edit, x+5 ys-3 w150 ReadOnly vActiveProfileTxt, %ActiveProfile%
+Gui, Add, Button, x+0 yp+0 w1 Hidden Default gLV_OK, OK
 Gui, Add, ListView, section xs+0 y+5 w305 -LV0x10 Sort -ReadOnly -Multi AltSubmit vProfileLV gProfileLV, Profile
 Gui, Add, Text, xs+0 y+8 section, X
 Gui, Add, Edit, x+3 ys-3 w60 Limit5 vPosXEdit gPosXEdit, 
@@ -34,9 +28,6 @@ Gui, Add, UpDown, vPosWUpDown gPosWUpDown Range0-9999
 Gui, Add, Text, x+5 ys+0, H
 Gui, Add, Edit, x+3 ys-3 w60 Limit4 vPosHEdit, 
 Gui, Add, UpDown, vPosHUpDown gPosHUpDown Range0-9999
-Gui, Add, Button, xs+0 y+10 gAddProfile, Add Profile
-Gui, Add, Button, x+5 yp+0 gDeleteProfile, Delete Profile
-Gui, Add, Button, x+0 yp+0 w1 Hidden Default gLV_OK, OK
 GuiControl, Focus, ProfileLV
 
 FileRead, ConfigFile, config.ini
@@ -55,6 +46,7 @@ Loop, Parse, ConfigFile, `r, `n
         }
     }
 }
+Sleep, 100  ;needed to finish all LV triggers
 GoSub, InitSelectionWindow
 if ShowProfilesOnStart
     GoSub, ShowSelectionWindow
@@ -103,16 +95,87 @@ CleanNumber(ByRef NumberToClean)
     
 }
 
+BuildMenu:
+    Menu, ProfileMenu, Add, Add Profile`tCtrl+N, AddProfile
+    Menu, ProfileMenu, Add, Delete Profile`tDel, DeleteProfile
+    Menu, ProfileMenu, Add, Set Default, SetDefaultProfile
+    Menu, SettingsMenu, Add, Autostart PoE, ToggleAutoStartPoE
+    Menu, SettingsMenu, Add, Show profiles on start, ToggleShowProfiles
+    Menu, SettingsMenu, Add, Store values on exit, ToggleStoreValues
+    Menu, SettingsMenu, Add, Always on top, ToggleAlwaysOnTop
+    Menu, MenuBar, Add, &Profiles, :ProfileMenu
+    Menu, MenuBar, Add, Settings, :SettingsMenu
+    Gui, Menu, MenuBar
+    if StartPoE
+        Menu, SettingsMenu, Check, Autostart PoE
+    if ShowProfilesOnStart
+        Menu, SettingsMenu, Check, Show profiles on start
+    if StoreValuesOnExit
+        Menu, SettingsMenu, Check, Store values on exit
+    if AlwaysOnTop
+        Menu, SettingsMenu, Check, Always on top
+Return
+
+ToggleAutoStartPoE:
+    Menu, SettingsMenu, ToggleCheck, Autostart PoE
+    StartPoE := !StartPoE
+    IniWrite, % StartPoE, config.ini, General, StartPoE
+Return
+
+ToggleShowProfiles:
+    Menu, SettingsMenu, ToggleCheck, Show profiles on start
+    ShowProfilesOnStart := !ShowProfilesOnStart
+    IniWrite, % ShowProfilesOnStart, config.ini, General, ShowProfilesOnStart
+Return
+
+ToggleStoreValues:
+    Menu, SettingsMenu, ToggleCheck, Store values on exit
+    StoreValuesOnExit := !StoreValuesOnExit
+    IniWrite, % StoreValuesOnExit, config.ini, General, StoreValuesOnExit
+Return
+
+ToggleAlwaysOnTop:
+    Menu, SettingsMenu, ToggleCheck, Always on top
+    AlwaysOnTop := !AlwaysOnTop
+    IniWrite, % AlwaysOnTop, config.ini, General, AlwaysOnTop
+    if AlwaysOnTop
+        Gui, +AlwaysOnTop
+    Else
+        Gui, -AlwaysOnTop
+Return
+
+#IfWinActive, Select Profile..
+    ^n::GoSub AddProfile
+    Del::GoSub DeleteProfile
+#IfWinActive
+
+BuildTrayMenu:
+    Menu, Tray, NoStandard
+    Menu, Tray, Icon, Display.dll, 1
+    Menu, Tray, Add, Start PoE, RunPoE
+    Menu, Tray, Add, Select Profile, ShowSelectionWindow
+    Menu, Tray, Add, Open Config, OpenConfig
+    Menu, Tray, Add, Reload, Reload
+    Menu, Tray, Add, Save Current Values, SaveCurrentValues
+    Menu, Tray, Add, Exit, Exit
+    Menu, Tray, Default, Start PoE
+Return
+
 InitSettings:
     DefaultProfileName := "New Profile "
     IniRead, StartPoE, config.ini, General, StartPoE, False
+    ConvertBool(StartPoE)
     IniRead, ClientPath, config.ini, General, ClientPath
     IniRead, ClientExecuteable, config.ini, General, ClientExe
-    IniRead, StoreValuesOnExit, config.ini, General, StoreValuesOnExit, True
+    IniRead, StoreValuesOnExit, config.ini, General, StoreValuesOnExit, False
+    ConvertBool(StoreValuesOnExit)
     ShowProfilesOnStart := ReadFromIni("config.ini", "General", "ShowProfilesOnStart", True)
+    ConvertBool(ShowProfilesOnStart)
+    AlwaysOnTop := ReadFromIni("config.ini", "General", "AlwaysOnTop", True)
+    ConvertBool(AlwaysOnTop)
     ActiveProfile := ReadFromIni("config.ini", "General", "Last Profile", "Default")
-
     ReadProfile(ActiveProfile, WinPosX, WinPosY, WinPosW, WinPosH)
+    
     Hotkey, IfWinExist, ahk_class POEWindowClass
     LeftWindowHK := ReadFromIni("config.ini", "Hotkey", "Left Window", "F9")
     if LeftWindowHK <>
@@ -138,7 +201,7 @@ InitSettings:
         Hotkey, %IncreasePoEWidthHK%, IncreasePoEWidth
     Hotkey, IfWinActive
 
-    if Format("{1:Ts}",StoreValuesOnExit) = "True"
+    if StoreValuesOnExit
         OnExit("ExitFunc")
 
 
@@ -159,7 +222,7 @@ InitSettings:
         SaveValues(true)
     }
 
-    if Format("{1:Ts}",StartPoE) = "True"
+    if StartPoE
     {
         RunPoE()
     }
@@ -186,6 +249,7 @@ LV_OK:
     if (WinPosH <> PosHEdit)
         WinPosH := PosHEdit
     SetNewProfile(NewProfileName, RowNo)
+    RunPoE()
 Return
 
 AddProfile:
@@ -223,17 +287,25 @@ DeleteProfile:
     }
 Return
 
+SetDefaultProfile:
+    RowNo := LV_GetNext(0, "Focused")
+    LV_GetText(NewProfileName, RowNo)
+    if (RowNo <> 0)
+    {
+        SetNewProfile(NewProfileName, RowNo)
+    }
+Return
+
 SetNewProfile(NewProfileName, RowNo)
 {
     global ActiveProfile, WinPosX, WinPosY, WinPosW, WinPosH
     if (NewProfileName <> ActiveProfile)
     {
         ActiveProfile := NewProfileName
-        ReadProfile(ActiveProfile, WinPosX, WinPosY, WinPosW, WinPosH)        
+        ReadProfile(ActiveProfile, WinPosX, WinPosY, WinPosW, WinPosH)
         GuiControl, , ActiveProfileTxt, %ActiveProfile%
         IniWrite, %ActiveProfile%, config.ini, General, Last Profile
     }
-    RunPoE()
     GoSub, ShowSelectionWindow
 }
 
@@ -295,7 +367,14 @@ WriteProfile(Profile, PosX, PosY, Width, Height)
 }
 
 InitSelectionWindow:
-Gui, Show, Hide, Select Profile..
+    Gui +LastFound
+    if AlwaysOnTop
+        Gui, +AlwaysOnTop
+    Gui, Show, Hide, Select Profile..
+    GuiControl, , PosXEdit, %WinPosX%
+    GuiControl, , PosYEdit, %WinPosY%
+    GuiControl, , PosWEdit, %WinPosW%
+    GuiControl, , PosHEdit, %WinPosH%
 Return
 
 ShowSelectionWindow:
@@ -402,4 +481,22 @@ ReadFromIni(File, Section, Key, Default)
     }
 
     Return %ReadValue%
+}
+
+ConvertBool(ByRef Bool)
+{
+    if Bool is Integer
+    {
+        if Bool < 0
+            Bool := False
+        Else if Bool > 1
+            Bool := True
+    } 
+    Else 
+    {
+        if Format("{1:Ts}",Bool) = "True"
+            Bool := True
+        Else
+            Bool := False
+    }
 }
