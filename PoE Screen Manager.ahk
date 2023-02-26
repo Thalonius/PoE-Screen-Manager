@@ -7,8 +7,8 @@ NonBreakSpace := Chr(160)
 
 GoSub, InitSettings
 
-GoSub, BuildMenu
 GoSub, BuildTrayMenu
+GoSub, BuildMenu
 
 Gui, Font, Bold
 Gui, +AlwaysonTop +LastFound -MinimizeBox -MaximizeBox
