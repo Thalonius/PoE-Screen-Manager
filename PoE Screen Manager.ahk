@@ -56,7 +56,8 @@ Loop, Parse, ConfigFile, `r, `n
     }
 }
 GoSub, InitSelectionWindow
-;GoSub, ShowSelectionWindow
+if ShowProfilesOnStart
+    GoSub, ShowSelectionWindow
 Return
 
 PosXEdit:
@@ -108,6 +109,7 @@ InitSettings:
     IniRead, ClientPath, config.ini, General, ClientPath
     IniRead, ClientExecuteable, config.ini, General, ClientExe
     IniRead, StoreValuesOnExit, config.ini, General, StoreValuesOnExit, True
+    ShowProfilesOnStart := ReadFromIni("config.ini", "General", "ShowProfilesOnStart", True)
     ActiveProfile := ReadFromIni("config.ini", "General", "Last Profile", "Default")
 
     ReadProfile(ActiveProfile, WinPosX, WinPosY, WinPosW, WinPosH)
